@@ -163,3 +163,5 @@ int main() {
     cin >> x;
     cout << a / x << '\n';
     cout << a % x << '\n';
+    return 0;
+}
