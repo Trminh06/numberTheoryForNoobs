@@ -1,0 +1,146 @@
+//-------------TASK-----------
+Phố Chùa Láng có thể mô phỏng như một đường thẳng, ở đó có gắn một trục tọa độ. Tiệm trà sữa của GSPVH nằm ở tọa độ 0. Ngày hôm nay, có n đơn hàng đặt cho GSPVH. Đơn hàng thứ i yêu cầu giao mi cốc trà sữa đến địa điểm có tọa độ xi. GSPVH đã pha xong toàn bộ trà sữa cho cả n đơn hàng. Tuy nhiên, mỗi một chuyến giao, GSPVH chỉ có thể mang theo mình tối đa k cốc trà sữa. Mọi khách hàng của GSPVH đều không quan tâm đến thời điểm nhận hàng, đồng thời một người có thể nhận nhiều cốc trà sữa ở những thời điểm khác nhau. Cuối ngày, GSPVH phải trở lại quán để chuẩn bị cho những ngày tiếp theo.
+
+Hãy cho biết tổng quãng đường nhỏ nhất GSPVH cần di chuyển để giao hàng cho toàn bộ n đơn hàng.
+
+Input
+Dòng đầu tiên chứa hai số nguyên n và k (1 ≤ n ≤ 106, 1 ≤ k ≤ 107), lần lượt là số đơn hàng cần xử lý và số cốc trà sữa tối đa GSPVH có thể mang trong một lần giao hàng.
+
+Trong n dòng tiếp theo, dòng thứ i chứa hai số nguyên xi (0 ≤ |xi| ≤ 108) và mi (1 ≤ mi ≤ 109) mô tả đơn hàng thứ i.
+
+Output
+Gồm một số nguyên duy nhất là độ dài quãng đường ngắn nhất GSPVH cần đi để giao cả n đơn hàng.
+//----------------------------
+
+#include<bits/stdc++.h>
+#define FOR(i,a,b) for (int i=(a),_b=(b);i<=_b;i=i+1)
+#define FORD(i,b,a) for (int i=(b),_a=(a);i>=_a;i=i-1)
+#define REP(i,n) for (int i=0,_n=(n);i<_n;i=i+1)
+#define FORE(i,v) for (__typeof((v).begin()) i=(v).begin();i!=(v).end();i++)
+#define ALL(v) (v).begin(),(v).end()
+#define fi   first
+#define se   second
+#define MASK(i) (1LL<<(i))
+#define BIT(x,i) (((x)>>(i))&1)
+#define div   ___div
+#define next   ___next
+#define prev   ___prev
+#define left   ___left
+#define right   ___right
+#define __builtin_popcount __builtin_popcountll
+using namespace std;
+template<class X,class Y>
+    void minimize(X &x,const Y &y) {
+        if (x>y) x=y;
+    }
+template<class X,class Y>
+    void maximize(X &x,const Y &y) {
+        if (x<y) x=y;
+    }
+template<class T>
+    T Abs(const T &x) {
+        return (x<0?-x:x);
+    }
+
+/* Author: Van Hanh Pham */
+
+struct Bignum {
+    static const int NUM_DIGIT = 3;
+    static const int BASE = (int)1e9;
+
+    int digits[NUM_DIGIT];
+
+    Bignum(long long x = 0) {
+        assert(x >= 0);
+        memset(digits, 0, sizeof digits);
+        REP(i, NUM_DIGIT) {
+            digits[i] = x % BASE; x /= BASE;
+        }
+    }
+
+    void operator += (const Bignum &x) {
+        int rem = 0;
+        REP(i, NUM_DIGIT) {
+            digits[i] += x.digits[i] + rem;
+            if (digits[i] >= BASE) {
+                digits[i] -= BASE;
+                rem = 1;
+            } else rem = 0;
+        }
+        assert(rem == 0);
+    }
+
+    Bignum operator + (const Bignum &x) const {
+        Bignum res = *this;
+        res += x;
+        return res;
+    }
+};
+
+ostream& operator << (ostream &os, const Bignum &x) {
+    string s;
+    REP(i, Bignum::NUM_DIGIT) {
+        int tmp = x.digits[i];
+        REP(love, 9) {
+            s.push_back('0' + tmp % 10);
+            tmp /= 10;
+        }
+    }
+    while (s.size() > 1 && s.back() == '0') s.pop_back();
+    reverse(ALL(s));
+    return os << s;
+}
+
+/** END OF TEMPLATE - ACTUAL SOLUTION COMES HERE **/
+
+Bignum solve(vector<pair<int, int>> &v, int lim) {
+    sort(ALL(v), greater<pair<int, int>> ());
+
+    int n = v.size();
+    int i = 0;
+
+    Bignum res = 0;
+    while (i < n) {
+        if (v[i].se >= lim) {
+            res += v[i].se / lim * 2LL * v[i].fi;
+            v[i].se %= lim;
+            if (v[i].se == 0) i++;
+        } else {
+            int pos = v[i].fi;
+            int sum = 0;
+            while (i < n && sum < lim) {
+                int tmp = min(lim - sum, v[i].se);
+                v[i].se -= tmp;
+                sum += tmp;
+                if (v[i].se == 0) i++;
+            }
+            res += 2 * pos;
+        }
+    }
+
+    return res;
+}
+
+void process(void) {
+    int n, lim; scanf("%d%d", &n, &lim);
+    vector<pair<int, int> > neg, pos;
+
+    REP(love, n) {
+        int x, y; scanf("%d%d", &x, &y);
+        if (x > 0) pos.push_back(make_pair(x, y));
+        if (x < 0) neg.push_back(make_pair(-x, y));
+    }
+
+    cout << solve(pos, lim) + solve(neg, lim) << endl;
+}
+
+int main(void) {
+#ifdef ONLINE_JUDGE
+    freopen("shipping.inp", "r", stdin);
+    freopen("shipping.out", "w", stdout);
+#endif // ONLINE_JUDGE
+    process();
+    return 0;
+}
+
+/*** LOOK AT MY CODE. MY CODE IS AMAZING :D ***/
